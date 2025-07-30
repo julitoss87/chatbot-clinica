@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: chatbot-flask
+    env: python
+    plan: free
+    region: oregon  # o el que prefieras: frankfurt, singapore, etc.
+    buildCommand: ""
+    startCommand: python app.py
+    envVars:
+      - key: PORT
+        value: 10000  # Render ignora esto si no es necesario, pero es útil como fallback
+    autoDeploy: true
