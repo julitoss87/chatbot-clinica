@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot Clínica</title>
+</head>
+<body>
+  <h1>Asistente Clínica</h1>
+  <input type="text" id="userInput" placeholder="Escribe tu mensaje">
+  <button onclick="sendMessage()">Enviar</button>
+  <div id="chatbox"></div>
+
+  <script>
+    async function sendMessage() {
+      const message = document.getElementById("userInput").value;
+      const response = await fetch("http://localhost:5000/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ message })
+      });
+
+      const data = await response.json();
+      document.getElementById("chatbox").innerHTML += `<p><b>Tú:</b> ${message}</p>`;
+      document.getElementById("chatbox").innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
+    }
+  </script>
+</body>
+</html>
