@@ -34,7 +34,7 @@ def whatsapp():
     phone_number = request.values.get('From', '')
     print("[INFO] Mensaje recibido:", incoming_msg)
 
-    respuesta = get_response(incoming_msg)
+    respuesta = get_response(incoming_msg, user_id=phone_number)
     print("[INFO] Respuesta generada:", respuesta)
 
     # Guardar conversación
