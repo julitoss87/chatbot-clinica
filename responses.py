@@ -40,7 +40,7 @@ def get_response(user_input, user_id="default"):
             return "👩‍⚕️ Un asesor se comunicará contigo en unos minutos. También puedes escribir directamente a nuestro WhatsApp empresarial."
         else:
             return (
-                "👋 Bienvenido(a) a Clínica Belleza Total ✨\n"
+                "👋 Bienvenido(a) a Clínica Guadalupe ✨\n"
                 "Escribe el número de la opción que deseas:\n"
                 "1. Información sobre cirugías faciales\n"
                 "2. Información sobre cirugías corporales\n"
