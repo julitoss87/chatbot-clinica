@@ -2,7 +2,7 @@ def get_response(message):
     message = message.lower()
 
     if "hola" in message:
-        return "Hola 👋 Bienvenido a Clínica BellaForma. ¿En qué podemos ayudarte hoy?"
+        return "Hola 👋 Bienvenido a Clínica Guadalupe. ¿En qué podemos ayudarte hoy?"
 
     elif "cita" in message:
         return "¿Deseas agendar una cita presencial o virtual? Por favor escribe 'presencial' o 'virtual'."
