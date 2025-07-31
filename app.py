@@ -4,36 +4,60 @@ from responses import get_response
 import os
 import csv
 from datetime import datetime
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 
 app = Flask(__name__)
 
-def guardar_conversacion(numero, mensaje_usuario, respuesta_bot):
-    archivo = "conversaciones.csv"
-    campos = ["numero", "mensaje_usuario", "respuesta_bot", "fecha_hora"]
+# Ruta temporal
+SERVICE_ACCOUNT_FILE = 'google_creds_temp.json'
 
-    nueva_fila = [numero, mensaje_usuario, respuesta_bot, datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+# Guardar contenido del .json desde variable de entorno
+creds_json = os.getenv('GOOGLE_CREDS_JSON')
 
-    archivo_existe = os.path.isfile(archivo)
+if creds_json:
+    with open(SERVICE_ACCOUNT_FILE, 'w') as f:
+        f.write(creds_json)
 
-    with open(archivo, mode="a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        if not archivo_existe:
-            writer.writerow(campos)
-        writer.writerow(nueva_fila)
+    gc = gspread.service_account(filename=SERVICE_ACCOUNT_FILE)
+    sheet = gc.open("Conversaciones Whatsapp").sheet1  # Asegúrate de haber creado una hoja llamada "Conversaciones"
+else:
+    sheet = None
+    print("[ERROR] GOOGLE_CREDS_JSON no está configurada correctamente")
+
+# Inicializar Google Sheets solo una vez
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+client = gspread.authorize(creds)
+
+# Reemplaza por el ID de tu hoja de cálculo
+SPREADSHEET_ID = "1FalJcUSUWiqLkP_bVratzoz6gYcR1wLsFqiqMuFcr_E"
+sheet = client.open_by_key(SPREADSHEET_ID).sheet1
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     incoming_msg = request.values.get('Body', '').strip()
-    numero = request.values.get('From', '').replace("whatsapp:", "").strip()
-
+    phone_number = request.values.get('From', '')
     print("[INFO] Mensaje recibido:", incoming_msg)
 
     respuesta = get_response(incoming_msg)
     print("[INFO] Respuesta generada:", respuesta)
 
-    # Guardar la conversación
-    guardar_conversacion(numero, incoming_msg, respuesta)
+    # Guardar conversación en Google Sheets si la hoja está disponible
+    if sheet:
+        try:
+            sheet.append_row([
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                phone_number,
+                incoming_msg,
+                respuesta
+            ])
+            print("[INFO] Conversación guardada en Google Sheets.")
+        except Exception as e:
+            print("[ERROR] No se pudo guardar en Google Sheets:", e)
 
+    # Responder al usuario
     resp = MessagingResponse()
     msg = resp.message()
     msg.body(respuesta)
